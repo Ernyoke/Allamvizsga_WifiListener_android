@@ -1,9 +1,13 @@
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
 
+import com.sapientia.wifilistener.R;
+
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -19,12 +23,11 @@ public class MainActivity extends ActionBarActivity {
 	private Button pauseButton;
 	private EditText portInput;
 	private TextView trafficTextView;
-	private TextView timer;
 	private TextView stateDisplay;
 	
-	private int traffic;
-	
 	private ClickListener listener;
+	
+	private static final int RESULT_SETTINGS = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +49,18 @@ public class MainActivity extends ActionBarActivity {
 		
 		LocalBroadcastManager.getInstance(this).registerReceiver(
 	           localRec, new IntentFilter(Constants.BROADCAST));
+		
+		//initialize settings and set default values at first start
+		SharedPreferences settingsPref = this.getSharedPreferences(Constants.SETTINGS, Context.MODE_PRIVATE);
+		Editor editSettings = settingsPref.edit();
+		if(!settingsPref.contains(Constants.SETTINGS_SAMPLERATE)) {
+			editSettings.putInt(Constants.SETTINGS_SAMPLERATE, 8000);
+			editSettings.commit();
+		}
+		if(!settingsPref.contains(Constants.SETTINGS_AUDIOFORMAT)) {
+			editSettings.putString(Constants.SETTINGS_AUDIOFORMAT, "ENCODING_PCM_16BIT");
+			editSettings.commit();
+		}
 	}
 	
 	@Override
@@ -73,6 +88,8 @@ public class MainActivity extends ActionBarActivity {
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
+			Intent i = new Intent(this,  SettingsActivity.class);
+            startActivityForResult(i, RESULT_SETTINGS);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

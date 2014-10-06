@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string-array name="audioFormats">
+        <item name="PCM_8BIT">PCM (8BIT)</item>
+        <item name="PCM_16BIT">PCM (16BIT)</item>
+    </string-array>
+    
+    <string-array name="audioFormatValues">
+        <item name="PCM_8BIT">ENCODING_PCM_8BIT</item>
+        <item name="PCM_16BIT">ENCODING_PCM_16BIT</item>
+    </string-array>
+    
+    <string-array name="sampleRates">
+        <item name="8000">8000 Hz</item>
+        <item name="11025">11025 Hz</item>
+        <item name="16000">16000 Hz</item>
+        <item name="22050">22050 Hz</item>
+        <item name="44100">44100 Hz</item>
+    </string-array>
+    
+    <string-array name="sampleRateValues">
+        <item name="8000">8000</item>
+        <item name="11025">11025</item>
+        <item name="16000">16000</item>
+        <item name="22050">22050</item>
+        <item name="44100">44100</item>
+    </string-array>
+    
+</resources>

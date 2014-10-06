@@ -1,5 +1,5 @@
 
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
 
 
 public class Constants {
@@ -18,7 +18,12 @@ public class Constants {
 	
 	public static final String WAKELOCK = "wifiListener_wakelock";
 	
-	
 	public static final int NOTIF_ID = 100;
+	
+	public static final int BUFFER_SIZE = 648;
+	
+	public static final String SETTINGS = "com.example.wifilistenner_settings";
+	public static final String SETTINGS_SAMPLERATE = "samplerate";
+	public static final String SETTINGS_AUDIOFORMAT = "audioformat";
 
 }

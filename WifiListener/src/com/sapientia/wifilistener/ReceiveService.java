@@ -1,4 +1,6 @@
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
+
+import com.sapientia.wifilistener.R;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -9,9 +11,7 @@ import android.content.Intent;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.NotificationCompat;
@@ -87,10 +87,10 @@ public class ReceiveService extends Service{
 				Log.d("VOICE", "aquired");
 			}
 			
-			receiveWorker = new ReceiveThread(portInput, 640, this);
+			receiveWorker = new ReceiveThread(portInput, this);
 			Thread thread = new Thread(receiveWorker);
 			thread.start();
-			builder.setContentTitle("Playing! Listening at port: " + portInput);
+			builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + portInput);
 			notificationManager.notify(Constants.NOTIF_ID, builder.build());
 			state = STATE.PLAYING;
 		}
@@ -99,14 +99,14 @@ public class ReceiveService extends Service{
 	public void pausePlayer() {
 		if(state == STATE.PLAYING) {
 			state = STATE.PAUSED;
-			builder.setContentTitle("Paused! Listening at port: " + portInput);
+			builder.setContentTitle(this.getString(R.string.paused_listenin_at_port) + portInput);
 			notificationManager.notify(Constants.NOTIF_ID, builder.build());
 			receiveWorker.pauseRec();
 		}
 		else {
 			if(state == STATE.PAUSED) {
 				state = STATE.PLAYING;
-				builder.setContentTitle("Playing! Listening at port: " + portInput);
+				builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + portInput);
 				notificationManager.notify(Constants.NOTIF_ID, builder.build());
 				receiveWorker.unPauseRec();
 			}
@@ -117,7 +117,7 @@ public class ReceiveService extends Service{
 		if(state != STATE.STOPPED) {
 			receiveWorker.stopRec();
 			state = STATE.STOPPED;
-			builder.setContentTitle("Stopped!");
+			builder.setContentTitle(this.getString(R.string.stopped));
 			notificationManager.notify(Constants.NOTIF_ID, builder.build());
 			
 			wakeLock.release();
@@ -146,8 +146,8 @@ public class ReceiveService extends Service{
 	
 	private Notification showNotification() {
 		builder = new NotificationCompat.Builder(this);
-		builder.setContentTitle("Stopped");
-		builder.setContentText("Tap to open!");
+		builder.setContentTitle(this.getString(R.string.stopped));
+		builder.setContentText(this.getString(R.string.tap_to_open));
 //		builder.setLargeIcon(R.drawable.ic_launcher);
 		builder.setAutoCancel(false);
 		builder.setSmallIcon(R.drawable.ic_launcher);

@@ -1,4 +1,4 @@
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -7,14 +7,14 @@ import java.net.DatagramSocket;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.SortedMap;
 import java.util.Timer;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -23,11 +23,12 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 @SuppressLint("NewApi")
 public class ReceiveThread implements Runnable{
 	
-	private SortedMap<BigInteger, byte[]> buffer;
+	private ConcurrentSkipListMap<BigInteger, byte[]> buffer;
 	private boolean isEnabled;
 	private boolean isPaused;
 	private int port;
@@ -43,12 +44,15 @@ public class ReceiveThread implements Runnable{
 	private WifiManager wifiManager;
 	private PowerManager powerManager;
 	
-	public ReceiveThread(int port, int packetLength, Context context) {
-		this.buffer = new TreeMap<BigInteger, byte[]>();
+	private SharedPreferences sharedSettings;
+	
+	private byte[] recBuffer;
+	
+	public ReceiveThread(int port, Context context) {
+		this.buffer = new ConcurrentSkipListMap<BigInteger, byte[]>();
 		isEnabled = true;
 		isPaused = false;
 		this.port = port;
-		this.packetLength = packetLength;
 		this.context = context;
 		
 		timer = new Timer();
@@ -57,12 +61,39 @@ public class ReceiveThread implements Runnable{
 		
 		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 		
-		voice = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, 
-                AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT, 
-                8192, AudioTrack.MODE_STREAM);
+		sharedSettings = context.getSharedPreferences(Constants.SETTINGS, Context.MODE_PRIVATE);
 		
+		int sampleRate = sharedSettings.getInt(Constants.SETTINGS_SAMPLERATE, 8000);
+		String audioFormat = sharedSettings.getString(Constants.SETTINGS_AUDIOFORMAT, "ENCODING_PCM_16BIT");
 		
-		voice.play();
+		switch(audioFormat) {
+			case "ENCODING_PCM_8BIT" : {
+				try {
+					voice = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, 
+			                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT, 
+			                16384, AudioTrack.MODE_STREAM);
+					voice.play();
+					}
+					catch(IllegalArgumentException e) {
+						Toast.makeText(context, context.getString(R.string.not_supported), 
+								   Toast.LENGTH_LONG).show();
+					}
+				break;
+			}
+			case "ENCODING_PCM_16BIT" : {
+				try {
+					voice = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, 
+			                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 
+			                16384, AudioTrack.MODE_STREAM);
+					voice.play();
+				}
+				catch(IllegalArgumentException e) {
+					Toast.makeText(context, context.getString(R.string.not_supported), 
+							   Toast.LENGTH_LONG).show();
+				}
+				break;
+			}
+		}
 		
 		wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -72,7 +103,13 @@ public class ReceiveThread implements Runnable{
 	public void stopRec() {
 		if(isEnabled) {
 			rSocket.close();
+			try{
 			voice.stop();
+			}
+			catch(IllegalStateException e) {
+				Log.d(Constants.LOG, e.getMessage());
+				e.printStackTrace();
+			}
 			voice.release();
 			isEnabled = false;
 			Intent intent = new Intent(Constants.BROADCAST);
@@ -84,8 +121,8 @@ public class ReceiveThread implements Runnable{
 	
 	public void pauseRec() {
 		isPaused = true;
-		voice.flush();
 		voice.pause();
+		voice.flush();
 	}
 	
 	public void unPauseRec() {
@@ -99,8 +136,9 @@ public class ReceiveThread implements Runnable{
 		
 		Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
 		
-		byte[] recBuffer = new byte[packetLength];
-	    DatagramPacket rPacket = new DatagramPacket(recBuffer, packetLength);
+		//buffer for receiving UDP packets
+		recBuffer = new byte[64 * 1024];
+	    DatagramPacket rPacket = new DatagramPacket(recBuffer, 64 * 1024);
 	    try {
 			rSocket = new DatagramSocket(port);
 			rSocket.setBroadcast(true);
@@ -113,11 +151,13 @@ public class ReceiveThread implements Runnable{
 			if(!isPaused) {
 				try {
 					rSocket.receive(rPacket);
+					packetLength = rPacket.getLength();
 					task.setData(packetLength);
 					
 					BigInteger timeStamp = getTimeStamp(recBuffer);
 					//removing timestamp from the beginning of the packet
-					byte[] finalRecBuffer = new byte[packetLength - 8];
+					byte[] finalRecBuffer = new byte[rPacket.getLength() - 8];
+					
 					finalRecBuffer = Arrays.copyOfRange(recBuffer, 8, packetLength);
 					buffer.put(timeStamp, finalRecBuffer);
 					if(buffer.size() >= 5) {
@@ -125,7 +165,7 @@ public class ReceiveThread implements Runnable{
 						while(iter.hasNext()) { 
 							BigInteger time = iter.next().getKey();
 							byte[] sample = buffer.get(time);
-							voice.write(sample, 0, 632);
+							voice.write(sample, 0, packetLength - 8);
 						}
 						buffer.clear();
 					}

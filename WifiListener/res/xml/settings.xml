@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+ 
+    <PreferenceCategory android:title="SETTINGS" >
+         <ListPreference
+            android:key="audioFormat"
+            android:entries="@array/audioFormats"
+            android:summary="Set Audio Format"
+            android:entryValues="@array/audioFormatValues"
+            android:title="Audio Format" />
+         
+         <ListPreference
+            android:key="sampleRate"
+            android:entries="@array/sampleRates"
+            android:summary="Set Sample Rate"
+            android:entryValues="@array/sampleRateValues"
+            android:title="Sample Rate" />
+    </PreferenceCategory>
+
+ 
+</PreferenceScreen>

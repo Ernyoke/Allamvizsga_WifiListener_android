@@ -1,4 +1,4 @@
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

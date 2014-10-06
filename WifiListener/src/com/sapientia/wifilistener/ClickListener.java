@@ -1,14 +1,13 @@
-package com.example.wifilistenner;
+package com.sapientia.wifilistener;
 
-import com.example.wifilistenner.ReceiveService.LocalBinder;
-import com.example.wifilistenner.ReceiveService.STATE;
+import com.sapientia.wifilistener.R;
+import com.sapientia.wifilistener.ReceiveService.LocalBinder;
+import com.sapientia.wifilistener.ReceiveService.STATE;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.view.*;
 import android.widget.EditText;
@@ -88,7 +87,7 @@ public class ClickListener implements View.OnClickListener{
 				stateDisplay.setText(stateToString(recService.getRunningState()));
 			}
 			catch(NumberFormatException ex) {
-				Toast.makeText(context, "Invalid input", Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, R.string.invalid_input, Toast.LENGTH_SHORT).show();
 			}
 			break;
 		}

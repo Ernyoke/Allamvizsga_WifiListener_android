@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.wifilistenner.MainActivity" >
+    tools:context="com.sapientia.wifilistener.MainActivity" >
 
     <TextView
         android:id="@+id/textView1"
@@ -15,16 +15,15 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="38dp"
-        android:text="Port" />
+        android:text="@string/port" />
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/button1"
         android:layout_marginTop="105dp"
-        android:text="Running:" />
+        android:text="@string/running" />
 
     <EditText
         android:id="@+id/portInput"
@@ -61,7 +60,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:text="Status:" />
+        android:text="@string/status" />
 
     <TextView
         android:id="@+id/textView4"
@@ -70,7 +69,7 @@
         android:layout_alignLeft="@+id/textView2"
         android:layout_below="@+id/textView2"
         android:layout_marginTop="30dp"
-        android:text="Speed:" />
+        android:text="@string/speed" />
 
     <TextView
         android:id="@+id/state"
@@ -88,7 +87,7 @@
         android:layout_alignBaseline="@+id/stopButton"
         android:layout_alignBottom="@+id/stopButton"
         android:layout_alignLeft="@+id/textView5"
-        android:text="Start" />
+        android:text="@string/start" />
 
     <Button
         android:id="@+id/pauseButton"
@@ -97,7 +96,7 @@
         android:layout_alignBaseline="@+id/stopButton"
         android:layout_alignBottom="@+id/stopButton"
         android:layout_alignRight="@+id/portInput"
-        android:text="Pause" />
+        android:text="@string/pause" />
 
     <Button
         android:id="@+id/stopButton"
@@ -107,6 +106,6 @@
         android:layout_marginRight="34dp"
         android:layout_marginTop="52dp"
         android:layout_toLeftOf="@+id/pauseButton"
-        android:text="Stop" />
+        android:text="@string/stop" />
 
 </RelativeLayout>
