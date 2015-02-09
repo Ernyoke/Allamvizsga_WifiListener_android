@@ -1,0 +1,108 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/tvPort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="40dp"
+        android:text="@string/port" />
+
+    <TextView
+        android:id="@+id/tvRunning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tvPort"
+        android:layout_below="@+id/tvPort"
+        android:text="@string/running" />
+
+    <EditText
+        android:id="@+id/portInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvPort"
+        android:layout_toRightOf="@+id/tvPort"
+        android:layout_marginLeft="30dp"
+        android:ems="10" 
+        android:inputType="number">
+
+        <requestFocus />
+    </EditText>
+
+    <TextView
+        android:id="@+id/tvTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvRunning"
+        android:layout_toRightOf="@+id/tvRunning"
+        android:layout_toEndOf="@+id/tvRunning"
+        android:layout_marginLeft="30dp"
+        android:text="0 sec" />
+
+    <TextView
+        android:id="@+id/traffic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvSpeed"
+        android:layout_toRightOf="@+id/tvSpeed"
+        android:layout_toEndOf="@+id/tvSpeed"
+        android:layout_marginLeft="30dp"
+        android:text="0 KBps" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTimer"
+        android:text="@string/status" />
+
+    <TextView
+        android:id="@+id/tvSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvStatus"
+        android:text="@string/speed" />
+
+    <TextView
+        android:id="@+id/state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tvStatus"
+        android:layout_toRightOf="@+id/tvStatus"
+        android:layout_toEndOf="@+id/tvStatus"
+        android:layout_marginLeft="30dp"
+        android:text="stopped" />
+
+    <Button
+        android:id="@+id/startButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/stopButton"
+        android:layout_alignBottom="@+id/stopButton"
+        android:layout_alignLeft="@+id/textView5"
+        android:text="@string/start" />
+
+    <Button
+        android:id="@+id/pauseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/stopButton"
+        android:layout_alignBottom="@+id/stopButton"
+        android:layout_alignRight="@+id/portInput"
+        android:text="@string/pause" />
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/state"
+        android:layout_marginRight="34dp"
+        android:layout_marginTop="52dp"
+        android:layout_toLeftOf="@+id/pauseButton"
+        android:text="@string/stop" />
+
+</RelativeLayout>

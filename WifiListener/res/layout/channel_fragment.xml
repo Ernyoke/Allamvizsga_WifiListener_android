@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/textLang"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="120dp"
+        android:text="Language:" />
+
+    <TextView
+        android:id="@+id/textCodec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textLang"
+        android:layout_below="@+id/textLang"
+        android:layout_marginTop="30dp"
+        android:text="Codec:" />
+
+    <TextView
+        android:id="@+id/textFreq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textCodec"
+        android:layout_below="@+id/textCodec"
+        android:layout_marginTop="30dp"
+        android:text="Frequency:" />
+
+    <TextView
+        android:id="@+id/textPort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textFreq"
+        android:layout_below="@+id/textFreq"
+        android:layout_marginTop="30dp"
+        android:text="Port:" />
+    
+    <TextView
+        android:id="@+id/textStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textPort"
+        android:layout_below="@+id/textPort"
+        android:layout_marginTop="30dp"
+        android:text="Status:" />
+    
+    <TextView
+        android:id="@+id/textSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textStatus"
+        android:layout_below="@+id/textStatus"
+        android:layout_marginTop="30dp"
+        android:text="Speed:" />
+    
+
+    <TextView
+        android:id="@+id/lang"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textLang"
+        android:layout_marginLeft="60dp"
+        android:layout_toRightOf="@+id/textLang"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/codec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textCodec"
+        android:layout_alignLeft="@+id/lang"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/frequency"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textFreq"
+        android:layout_alignRight="@+id/codec"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/port"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textPort"
+        android:layout_alignRight="@+id/frequency"
+        android:text="TextView" />
+    
+     <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textStatus"
+        android:layout_alignRight="@+id/port"
+        android:text="TextView" />
+     
+     <TextView
+        android:id="@+id/speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/textSpeed"
+        android:layout_alignRight="@+id/status"
+        android:text="TextView" />
+
+    <Button
+        android:id="@+id/startBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textStatus"
+        android:layout_below="@+id/textStatus"
+        android:layout_marginTop="64dp"
+        android:text="Start" />
+
+    <Button
+        android:id="@+id/stopBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/startBtn"
+        android:layout_alignBottom="@+id/startBtn"
+        android:layout_toRightOf="@+id/startBtn"
+        android:text="Stop" />
+
+    <Button
+        android:id="@+id/pauseBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/stopBtn"
+        android:layout_alignBottom="@+id/stopBtn"
+        android:layout_toRightOf="@+id/stopBtn"
+        android:text="Pause" />
+
+</RelativeLayout>

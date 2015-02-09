@@ -48,18 +48,18 @@ public class ReceiveService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		Log.d(Constants.LOG, "recService created");
 		powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 		        Constants.WAKELOCK);
 		
 		wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
 			    .createWifiLock(WifiManager.WIFI_MODE_FULL, Constants.WAKELOCK);
+		notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
 	}
 
 	@Override
 	 public int onStartCommand(Intent intent, int flags, int startId) {
-		
-		notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
 		
 		callListener = new CallStateListener(this.getApplicationContext(), this);
 		
@@ -67,6 +67,13 @@ public class ReceiveService extends Service{
 		tmanager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE);
 		
 		this.startForeground(Constants.NOTIF_ID, showNotification());
+		
+		if(this.state == STATE.STOPPED) {
+			Log.d(Constants.LOG, "STOPPED");
+		}
+		else {
+			Log.d(Constants.LOG, "NOT STOPPED");
+		}
 		
         return START_STICKY;
     }
@@ -146,7 +153,12 @@ public class ReceiveService extends Service{
 	
 	private Notification showNotification() {
 		builder = new NotificationCompat.Builder(this);
-		builder.setContentTitle(this.getString(R.string.stopped));
+		if(state == STATE.STOPPED) {
+			builder.setContentTitle(this.getString(R.string.stopped));
+		}
+		if(state == STATE.PLAYING) {
+			builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + this.portInput);
+		}
 		builder.setContentText(this.getString(R.string.tap_to_open));
 //		builder.setLargeIcon(R.drawable.ic_launcher);
 		builder.setAutoCancel(false);

@@ -25,5 +25,7 @@ public class Constants {
 	public static final String SETTINGS = "com.example.wifilistenner_settings";
 	public static final String SETTINGS_SAMPLERATE = "samplerate";
 	public static final String SETTINGS_AUDIOFORMAT = "audioformat";
+	
+	public static final String AUTHENTIFICATION = "authentification";
 
 }

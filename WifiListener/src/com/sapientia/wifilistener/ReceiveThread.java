@@ -25,10 +25,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-@SuppressLint("NewApi")
 public class ReceiveThread implements Runnable{
 	
-	private ConcurrentSkipListMap<BigInteger, byte[]> buffer;
+	private ConcurrentSkipListMap<BigInteger, SoundChunk> buffer;
 	private boolean isEnabled;
 	private boolean isPaused;
 	private int port;
@@ -48,8 +47,10 @@ public class ReceiveThread implements Runnable{
 	
 	private byte[] recBuffer;
 	
+	public static final int UDP_MAX_SIZE = 64 * 1024;
+	
 	public ReceiveThread(int port, Context context) {
-		this.buffer = new ConcurrentSkipListMap<BigInteger, byte[]>();
+		this.buffer = new ConcurrentSkipListMap<BigInteger, SoundChunk>();
 		isEnabled = true;
 		isPaused = false;
 		this.port = port;
@@ -133,7 +134,8 @@ public class ReceiveThread implements Runnable{
 
 	@Override
 	public void run() {
-		
+		WifiManager.MulticastLock lock = wifiManager.createMulticastLock("Log_Tag");
+		lock.acquire();
 		Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
 		
 		//buffer for receiving UDP packets
@@ -153,19 +155,20 @@ public class ReceiveThread implements Runnable{
 					rSocket.receive(rPacket);
 					packetLength = rPacket.getLength();
 					task.setData(packetLength);
-					
-					BigInteger timeStamp = getTimeStamp(recBuffer);
+					//rebuild packet
+					Protocol protocol = new Protocol(recBuffer);
+					BigInteger timeStamp = protocol.getTimestamp();
+					byte[] data = protocol.getData();
+					SoundChunk soundchunk = new SoundChunk(data);
+					buffer.put(timeStamp, soundchunk);
+					Log.d(Constants.LOG, timeStamp.toString());
 					//removing timestamp from the beginning of the packet
-					byte[] finalRecBuffer = new byte[rPacket.getLength() - 8];
-					
-					finalRecBuffer = Arrays.copyOfRange(recBuffer, 8, packetLength);
-					buffer.put(timeStamp, finalRecBuffer);
 					if(buffer.size() >= 5) {
-						Iterator<Entry<BigInteger, byte[]>> iter = buffer.entrySet().iterator();
+						Iterator<Entry<BigInteger, SoundChunk>> iter = buffer.entrySet().iterator();
 						while(iter.hasNext()) { 
 							BigInteger time = iter.next().getKey();
-							byte[] sample = buffer.get(time);
-							voice.write(sample, 0, packetLength - 8);
+							SoundChunk sample = buffer.get(time);
+							voice.write(sample.getRawsound(), 0, sample.getSoundSize());
 						}
 						buffer.clear();
 					}
@@ -178,50 +181,11 @@ public class ReceiveThread implements Runnable{
 				//
 			}
 			if(!isEnabled) {
+				lock.release();
 				break;
 			}
 		}
 		
 	}
 	
-	
-	//return the timestamp of every package
-	private BigInteger getTimeStamp(byte[] buffer) {
-		long stamp = 0;
-		long o = 1;
-		int[] asdw = new int[64];
-		String asd = "";
-		int k = 0;
-		for(int i = 7; i >= 0; --i) {
-			byte aux = buffer[i];
-			byte one = 1;
-			for(int j = 7; j >= 0; --j) {
-				if((aux & one) == one){
-					stamp = stamp << 1;
-					stamp = stamp | o;
-					asdw[8 * (8 - i - 1)  + j] = 1;
-				}
-				else {
-					stamp = stamp << 1;
-					asdw[8 * (8 - i - 1) + j] = 0;
-				}
-				aux = (byte) (aux>>>1);
-				
-			}
-			//stamp = stamp << 8;
-			//stamp = stamp | aux;
-			k++;
-		}
-		for(int i = 0; i < 64; ++i) {
-			if(asdw[i] == 0) {
-				asd += "0";
-			}
-			else {
-				asd += "1";
-			}
-		}
-		BigInteger bigint = new BigInteger(asd, 2);
-		return bigint; 
-	}
-
 }

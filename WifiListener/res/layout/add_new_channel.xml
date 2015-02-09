@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:id="@+id/langText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="80dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
+        android:text="Language:" />
+
+    <TextView
+        android:id="@+id/portText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/langText"
+        android:layout_below="@+id/langText"
+        android:layout_marginTop="30dp"
+        android:text="Port:" />
+
+    <TextView
+        android:id="@+id/codecText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/langText"
+        android:layout_below="@+id/portText"
+        android:layout_marginTop="60dp"
+        android:text="Codec:" />
+    
+    <TextView
+        android:id="@+id/freqText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/langText"
+        android:layout_below="@+id/codecText"
+        android:layout_marginTop="30dp"
+        android:text="Frequency:" />
+
+    <EditText
+        android:id="@+id/langInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/langText"
+        android:layout_alignBottom="@+id/langText"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="40dp"
+        android:layout_toRightOf="@+id/freqText"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+    
+        <EditText
+        android:id="@+id/portInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/portText"
+        android:layout_alignBottom="@+id/portText"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="40dp"
+        android:layout_toRightOf="@+id/freqText"
+        android:ems="10" >
+
+    </EditText>
+
+        <Spinner
+            android:id="@+id/codecSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/portInput"
+            android:layout_alignBottom="@+id/codecText"
+            android:layout_marginRight="40dp"/>
+
+        <Spinner
+            android:id="@+id/freqSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignLeft="@+id/portInput"
+            android:layout_alignBottom="@+id/freqText"
+            android:layout_marginRight="40dp"/>
+
+        <Button
+            android:id="@+id/doneBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/freqSpinner"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="52dp"
+            android:text="Done" />
+
+</RelativeLayout>
