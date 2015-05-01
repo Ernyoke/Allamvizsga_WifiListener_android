@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/imageExit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="104dp"
+        android:src="@drawable/exit_green_img" />
+
+    <TextView
+        android:id="@+id/exitQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageExit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="68dp"
+        android:gravity="center"
+        android:text="Would you like to close all running channels and exit?" />
+
+    <Button
+        android:id="@+id/exitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/exitQuestion"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="61dp"
+        android:text="Close and Exit" />
+
+</RelativeLayout>

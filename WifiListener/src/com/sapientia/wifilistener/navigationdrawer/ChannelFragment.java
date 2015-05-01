@@ -1,32 +1,32 @@
 package com.sapientia.wifilistener.navigationdrawer;
 
-import com.sapientia.wifilistener.HandleServices;
-import com.sapientia.wifilistener.R;
-
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
-public class ChannelFragment extends Fragment{
+import com.sapientia.wifilistener.R;
+
+public class ChannelFragment extends BaseFragment{
 	
-	private Button startBtn;
-	private Button stopBtn;
-	private Button pauseBtn;
+	private ImageButton startBtn;
+	private ImageButton stopBtn;
+	private ImageButton pauseBtn;
+	
+	private TextView bigTitle;
 	
 	private TextView language;
 	private TextView port;
 	private TextView codec;
-	private TextView frequency;
+	private TextView sampleRate;
+	private TextView sampleSize;
+	private TextView channels;
 	private TextView status;
-	private TextView speed;
 	
 	private NavDrawerChannel channel;
-	
-	private HandleServices handleServices;
 	
 	private View.OnClickListener clickListener;
 	
@@ -35,10 +35,6 @@ public class ChannelFragment extends Fragment{
 	
 	public void setChannel(NavDrawerChannel channel) {
 		this.channel = channel;
-	}
-	
-	public void setServiceHandler(HandleServices handleServices) {
-		this.handleServices = handleServices;
 	}
 	
 	private void setClickListeners() {
@@ -67,8 +63,28 @@ public class ChannelFragment extends Fragment{
 		pauseBtn.setOnClickListener(clickListener);
 	}
 	
-	public void asd() {
-		//
+	public void updateButtonStatus() {
+      switch(channel.getState()) {
+      case STOPPED: {
+      	stopBtn.setEnabled(false);
+      	startBtn.setEnabled(true);
+      	pauseBtn.setEnabled(false);
+      	break;
+      }
+      
+      case PLAYING: {
+      	stopBtn.setEnabled(true);
+      	startBtn.setEnabled(false);
+      	pauseBtn.setEnabled(true);
+      	break;
+      }
+      
+      case PAUSED: {
+      	startBtn.setEnabled(false);
+      	stopBtn.setEnabled(true);
+      	pauseBtn.setEnabled(true);
+      }
+      }
 	}
 	
 	@Override
@@ -77,23 +93,34 @@ public class ChannelFragment extends Fragment{
  
         View rootView = inflater.inflate(R.layout.channel_fragment, container, false);
         
-        startBtn = (Button) rootView.findViewById(R.id.startBtn);
-        stopBtn = (Button) rootView.findViewById(R.id.stopBtn);
-        pauseBtn = (Button) rootView.findViewById(R.id.pauseBtn);
+        startBtn = (ImageButton) rootView.findViewById(R.id.startBtn);
+        stopBtn = (ImageButton) rootView.findViewById(R.id.stopBtn);
+        pauseBtn = (ImageButton) rootView.findViewById(R.id.pauseBtn);
+        
+        bigTitle = (TextView) rootView.findViewById(R.id.bigTitle);
         
         language = (TextView) rootView.findViewById(R.id.lang);
         port = (TextView) rootView.findViewById(R.id.port);
         codec = (TextView) rootView.findViewById(R.id.codec);
-        frequency = (TextView) rootView.findViewById(R.id.frequency);
+        sampleRate = (TextView) rootView.findViewById(R.id.sampleRate);
+        sampleSize = (TextView) rootView.findViewById(R.id.sampleSize);
+        channels = (TextView) rootView.findViewById(R.id.channels);
+        
         status = (TextView) rootView.findViewById(R.id.status);
-        speed = (TextView) rootView.findViewById(R.id.speed);
+        
+        bigTitle.setText(channel.getTitle());
         
         language.setText(channel.getTitle());
         port.setText(channel.getPort() + "");
         codec.setText(channel.getCodec());
-        frequency.setText(channel.getFrequency() + "");
-//        status.setText(channel.getState());
-        //speed
+        sampleRate.setText(channel.getSampleRate() + "");
+        sampleSize.setText(channel.getSampleSize() + "");
+        channels.setText(channel.getChannels() + "");
+        
+        status.setText(channel.getState_str());
+        
+//        //speed
+        this.updateButtonStatus();
          
         return rootView;
     }

@@ -38,7 +38,25 @@
         android:layout_alignLeft="@+id/langText"
         android:layout_below="@+id/codecText"
         android:layout_marginTop="30dp"
-        android:text="Frequency:" />
+        android:text="Sample Rate:" />
+    
+    <TextView
+        android:id="@+id/sampSizeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/langText"
+        android:layout_below="@+id/freqText"
+        android:layout_marginTop="30dp"
+        android:text="Sample Size:" />
+    
+    <TextView
+        android:id="@+id/chanText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/langText"
+        android:layout_below="@+id/sampSizeText"
+        android:layout_marginTop="30dp"
+        android:text="Channels:" />
 
     <EditText
         android:id="@+id/langInput"
@@ -83,14 +101,42 @@
             android:layout_alignLeft="@+id/portInput"
             android:layout_alignBottom="@+id/freqText"
             android:layout_marginRight="40dp"/>
+        
+        <Spinner
+            android:id="@+id/sampSizeSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignLeft="@+id/portInput"
+            android:layout_alignBottom="@+id/sampSizeText"
+            android:layout_marginRight="40dp"/>
+        
+        <Spinner
+            android:id="@+id/channSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignLeft="@+id/portInput"
+            android:layout_alignBottom="@+id/chanText"
+            android:layout_marginRight="40dp"/>
 
         <Button
             android:id="@+id/doneBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/freqSpinner"
+            android:layout_below="@+id/channSpinner"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="52dp"
             android:text="Done" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/langInput"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="14dp"
+            android:text="Add new channel"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

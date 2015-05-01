@@ -1,12 +1,15 @@
 package com.sapientia.wifilistener;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class SoundChunk {
 	
-	int frekv;
+	int sampleRate;
+	int sampleSize;
 	int channels;
-	char[] codec;
+	int codecSize;
+	String codec;
 	int buffsize;
 	byte[] soundPacket;
 	
@@ -14,11 +17,13 @@ public class SoundChunk {
 	
 	public SoundChunk(byte[] data) {
 		ByteBuffer buffer = ByteBuffer.wrap(data);
-		frekv = buffer.getInt();
+		sampleRate = buffer.getInt();
+		sampleSize = buffer.getInt();
 		channels = buffer.getInt();
-		byte[] tempCodec = new byte[CODEC_SIZE];
-		buffer.get(tempCodec, 0, CODEC_SIZE);
-		codec = tempCodec.toString().toCharArray();
+		codecSize = buffer.getInt();
+		byte[] codecBuff = new byte[codecSize];
+		buffer.get(codecBuff, 0, codecSize);
+		codec = new String(codecBuff, Charset.forName("UTF-16BE"));
 		buffsize = buffer.getInt();
 		soundPacket = new byte[buffsize];
 		buffer.get(soundPacket, 0, buffsize);

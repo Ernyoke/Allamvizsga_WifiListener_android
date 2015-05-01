@@ -19,7 +19,9 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -27,9 +29,9 @@ import android.widget.Toast;
 
 public class ReceiveThread implements Runnable{
 	
-	private ConcurrentSkipListMap<BigInteger, SoundChunk> buffer;
-	private boolean isEnabled;
-	private boolean isPaused;
+	private ConcurrentSkipListMap<Long, SoundChunk> buffer;
+	private volatile boolean isEnabled;
+	private volatile boolean isPaused;
 	private int port;
 	private int packetLength;
 	private AudioTrack voice;
@@ -41,6 +43,8 @@ public class ReceiveThread implements Runnable{
 	
 	private NotificationManager notificationManager;
 	private WifiManager wifiManager;
+	private WifiLock wifilock;
+	private WakeLock wakelock;
 	private PowerManager powerManager;
 	
 	private SharedPreferences sharedSettings;
@@ -49,8 +53,8 @@ public class ReceiveThread implements Runnable{
 	
 	public static final int UDP_MAX_SIZE = 64 * 1024;
 	
-	public ReceiveThread(int port, Context context) {
-		this.buffer = new ConcurrentSkipListMap<BigInteger, SoundChunk>();
+	public ReceiveThread(int port, String codec, int sampleRate, int sampleSize, int channels, Context context) {
+		this.buffer = new ConcurrentSkipListMap<Long, SoundChunk>();
 		isEnabled = true;
 		isPaused = false;
 		this.port = port;
@@ -61,39 +65,42 @@ public class ReceiveThread implements Runnable{
 		timer.scheduleAtFixedRate(task, 0, 1000);
 		
 		notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+	
+		int audioFormat_encoding = AudioFormat.ENCODING_PCM_16BIT;
 		
-		sharedSettings = context.getSharedPreferences(Constants.SETTINGS, Context.MODE_PRIVATE);
+		if(codec.equals("audio/pcm") && sampleSize == 8) {
+			audioFormat_encoding = AudioFormat.ENCODING_PCM_8BIT;
+		}
 		
-		int sampleRate = sharedSettings.getInt(Constants.SETTINGS_SAMPLERATE, 8000);
-		String audioFormat = sharedSettings.getString(Constants.SETTINGS_AUDIOFORMAT, "ENCODING_PCM_16BIT");
+		if(codec.equals("audio/pcm") && sampleSize == 16) {
+			audioFormat_encoding = AudioFormat.ENCODING_PCM_16BIT;
+		}
 		
-		switch(audioFormat) {
-			case "ENCODING_PCM_8BIT" : {
-				try {
-					voice = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, 
-			                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT, 
-			                16384, AudioTrack.MODE_STREAM);
-					voice.play();
-					}
-					catch(IllegalArgumentException e) {
-						Toast.makeText(context, context.getString(R.string.not_supported), 
-								   Toast.LENGTH_LONG).show();
-					}
-				break;
-			}
-			case "ENCODING_PCM_16BIT" : {
-				try {
-					voice = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, 
-			                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, 
-			                16384, AudioTrack.MODE_STREAM);
-					voice.play();
-				}
-				catch(IllegalArgumentException e) {
-					Toast.makeText(context, context.getString(R.string.not_supported), 
-							   Toast.LENGTH_LONG).show();
-				}
-				break;
-			}
+		int audioFormat_channel;
+		
+		switch(channels) {
+		case 1: {
+			audioFormat_channel = AudioFormat.CHANNEL_OUT_MONO;
+			break;
+		}
+		case 2:  {
+			audioFormat_channel = AudioFormat.CHANNEL_OUT_STEREO;
+			break;
+		}
+		default: {
+			audioFormat_channel = AudioFormat.CHANNEL_OUT_MONO;
+		}
+		}
+		
+		try {
+			voice = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate, 
+	                audioFormat_channel, audioFormat_encoding, 
+	                16384, AudioTrack.MODE_STREAM);
+			voice.play();
+		}
+		catch(IllegalArgumentException e) {
+			Toast.makeText(context, context.getString(R.string.not_supported), 
+					   Toast.LENGTH_LONG).show();
 		}
 		
 		wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -134,9 +141,32 @@ public class ReceiveThread implements Runnable{
 
 	@Override
 	public void run() {
-		WifiManager.MulticastLock lock = wifiManager.createMulticastLock("Log_Tag");
-		lock.acquire();
-		Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+		wifilock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "locsss");
+		WifiManager.MulticastLock lock = wifiManager.createMulticastLock("multicast_lock_kurva_jo_anyadat");
+//		wifilock.acquire();
+		
+//		if(!wifilock.isHeld()) {
+//			wifilock.acquire();
+//			Log.d(Constants.LOG, "wifilock aquired!");
+//		}
+//		else {
+//			Log.d(Constants.LOG, "wifilock not aquired!");
+//		}
+//		wakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "asdasd");
+//		if(!wakelock.isHeld()) {
+//			wakelock.acquire();
+//			Log.d(Constants.LOG, "wakelock aquired!");
+//		}
+//		else {
+//			Log.d(Constants.LOG, "wakelock not aquired!");
+//		}
+		if(!lock.isHeld()) {
+			lock.acquire();
+			Log.d(Constants.LOG, "multicast aquired!");
+		}
+		else {
+			Log.d(Constants.LOG, "multicast not aquired!");
+		}
 		
 		//buffer for receiving UDP packets
 		recBuffer = new byte[64 * 1024];
@@ -148,25 +178,26 @@ public class ReceiveThread implements Runnable{
 			e.printStackTrace();
 			Log.d(Constants.LOG, e.getMessage());
 		}
+	    Log.d(Constants.LOG, "player should start!");
 		while(isEnabled) {
 			
 			if(!isPaused) {
 				try {
+					
 					rSocket.receive(rPacket);
 					packetLength = rPacket.getLength();
 					task.setData(packetLength);
 					//rebuild packet
 					Protocol protocol = new Protocol(recBuffer);
-					BigInteger timeStamp = protocol.getTimestamp();
+					long timeStamp = protocol.getTimestamp();
 					byte[] data = protocol.getData();
 					SoundChunk soundchunk = new SoundChunk(data);
 					buffer.put(timeStamp, soundchunk);
-					Log.d(Constants.LOG, timeStamp.toString());
-					//removing timestamp from the beginning of the packet
-					if(buffer.size() >= 5) {
-						Iterator<Entry<BigInteger, SoundChunk>> iter = buffer.entrySet().iterator();
+//					Log.d(Constants.LOG, timeStamp + "");
+					if(buffer.size() >= 2) {
+						Iterator<Entry<Long, SoundChunk>> iter = buffer.entrySet().iterator();
 						while(iter.hasNext()) { 
-							BigInteger time = iter.next().getKey();
+							Long time = iter.next().getKey();
 							SoundChunk sample = buffer.get(time);
 							voice.write(sample.getRawsound(), 0, sample.getSoundSize());
 						}
@@ -182,9 +213,16 @@ public class ReceiveThread implements Runnable{
 			}
 			if(!isEnabled) {
 				lock.release();
+//				wifilock.release();
+//				wakelock.release();
 				break;
 			}
+			else {
+//				Log.d(Constants.LOG, "isenabled!");
+			}
 		}
+//		wakelock.release();
+//		wifilock.release();
 		
 	}
 	

@@ -36,15 +36,6 @@
         android:text="WIFI Listener"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <Button
-        android:id="@+id/retryBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/title"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="64dp"
-        android:text="Authentificate" />
-
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
@@ -52,7 +43,7 @@
         android:layout_alignLeft="@+id/textView1"
         android:layout_below="@+id/addressInput"
         android:layout_marginTop="46dp"
-        android:text="Status" />
+        android:text="Status:" />
 
     <TextView
         android:id="@+id/statusText"
@@ -62,5 +53,24 @@
         android:layout_alignBottom="@+id/textView2"
         android:layout_alignLeft="@+id/addressInput"
         android:text="-" />
+
+    <Button
+        android:id="@+id/retryBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="29dp"
+        android:text="Connect" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/retryBtn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:visibility="invisible"/>
 
 </RelativeLayout>

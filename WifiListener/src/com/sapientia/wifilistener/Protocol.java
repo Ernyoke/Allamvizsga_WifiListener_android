@@ -2,17 +2,18 @@ package com.sapientia.wifilistener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 //this class receives the raw buffer from a datagram and rebuilds it conform a set protocol
@@ -20,12 +21,17 @@ public class Protocol {
 	
 	byte[] buffer;
 	
-	BigInteger timestamp;
+	long timestamp;
 	PROTOCOL_ID id;
 	int clientId;
 	int packets;
 	int packet_nr;
 	int buffsize;
+	
+	static long packetCounter = 0;
+	
+	private static final int MAX_AVAILABLE = 1;
+	private final Semaphore mutex = new Semaphore(MAX_AVAILABLE, true);
 	
 	private static final int CONTENTSIZE = 65000;
 	
@@ -37,7 +43,15 @@ public class Protocol {
 		LOGIN_ACK(2),
 		LOGOUT(3),
 		GET_LIST(4),
-		SOUND(5);
+		LIST(5),
+		SOUND(6),
+		NEW_CHANNEL(7),
+		NEW_CHANNEL_ACK(8),
+		CLOSE_CHANNEL(9), 
+		REMOVE_CHANNEL(10),
+		SYNCH(11),
+		SYNCH_RESP(12),
+		SERVER_DOWN(13);
 
 	    private int numVal;
 
@@ -90,17 +104,13 @@ public class Protocol {
 	
 	private void buildProtocol() {
 		ByteBuffer tmpBuffer = ByteBuffer.wrap(buffer);
+		long packetCounterTmp = tmpBuffer.getLong();
 		int id = tmpBuffer.getInt();
 		this.id = PROTOCOL_ID.fromIntValue(id);
 		this.clientId = tmpBuffer.getInt();
-//		byte[] timestampBuff = new byte[TIMESTAMP_SIZE];
-//		tmpBuffer.get(timestampBuff, 0, TIMESTAMP_SIZE);
-		long timp = tmpBuffer.getLong();
-//		timestamp = new BigInteger(timestampBuff);
+		timestamp = tmpBuffer.getLong();
 		packets = tmpBuffer.getInt();
 		packet_nr = tmpBuffer.getInt();
-		buffsize = tmpBuffer.getInt();
-		//double
 		buffsize = tmpBuffer.getInt();
 		byte[] tmpData = new byte[buffsize];
 		tmpBuffer.get(tmpData, 0, buffsize);
@@ -128,7 +138,7 @@ public class Protocol {
 		return out.toByteArray();
 	}
 	
-	public BigInteger getTimestamp() {
+	public long getTimestamp() {
 		return timestamp;
 	}
 	
@@ -144,30 +154,68 @@ public class Protocol {
 		return buffsize;
 	}
 	
-	
-	public void send(DatagramSocket socket, InetAddress address, int port) {
-		int i = 0;
-		long asd = 65484789;
-		for(byte[] chunk : data) {
-			ByteBuffer buffer = ByteBuffer.allocate(65507);
-			buffer.putInt(id.getNumVal());
-			buffer.putInt(clientId);
-			buffer.putLong(asd);
-			buffer.putInt(data.size());
-			buffer.putInt(i);
-			buffer.putInt(chunk.length);
-			buffer.putInt(chunk.length);
-			buffer.put(chunk);
-			DatagramPacket packet = new DatagramPacket(buffer.array(), buffer.array().length);
-			packet.setPort(port);
-			packet.setAddress(address);
-			try {
-				socket.send(packet);
-			} catch (IOException e) {
-				Log.d(Constants.LOG, "Send error:" + e.getMessage());
-				e.printStackTrace();
-			}
+	public ByteBuffer getContent() {
+		ByteBuffer content = ByteBuffer.allocate(CONTENTSIZE);
+		for(byte[] it : data) {
+			content.put(it);
 		}
+		return content;
+	}
+	
+	public static long generateTimeStamp() {
+		long timestamp = System.currentTimeMillis();
+		return timestamp;
+	}
+	
+	
+	public void send(final DatagramSocket socket, final InetSocketAddress address, final int port) {
+		new AsyncTask<Void, Void, Void>() {
+			@Override
+			protected Void doInBackground(Void... params) {
+				int i = 0;
+				long timestamp = generateTimeStamp();
+				ByteBuffer buffer = ByteBuffer.allocate(65507);
+				int packetSize = 0;
+				for(byte[] chunk : data) {
+					try {
+						mutex.acquire();
+						packetCounter++;
+						buffer.putLong(packetCounter);
+						mutex.release();
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					buffer.putInt(id.getNumVal());
+					buffer.putInt(clientId);
+					buffer.putLong(timestamp);
+					buffer.putInt(data.size());
+					buffer.putInt(i);
+					buffer.putInt(chunk.length);
+					buffer.put(chunk);
+					buffer.flip();
+					packetSize = buffer.limit();
+					byte[] content = new byte[packetSize];
+					buffer.get(content);
+					DatagramPacket packet = new DatagramPacket(content, packetSize);
+					Log.d(Constants.LOG, "Arrya lenght:" + packetSize);
+					packet.setPort(port);
+					packet.setAddress(address.getAddress());
+					try {
+						socket.send(packet);
+						Log.d(Constants.LOG, "Port:" + socket.getPort() + " ");
+					} catch (IOException e) {
+						Log.d(Constants.LOG, "Send error:" + e.getMessage());
+						e.printStackTrace();
+					} catch (RuntimeException e) {
+						Log.d(Constants.LOG, "Send error:" + e.getMessage());
+						e.printStackTrace();
+					}
+				}
+				return null;
+			}
+			
+		}.execute();
 	}
 	
 	

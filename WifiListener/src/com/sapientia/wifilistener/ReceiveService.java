@@ -2,29 +2,25 @@ package com.sapientia.wifilistener;
 
 import com.sapientia.wifilistener.R;
 
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
 import android.net.wifi.WifiManager.WifiLock;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.PowerManager.WakeLock;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-public class ReceiveService extends Service{
+public class ReceiveService extends ForegroundServices {
 	
 	private ReceiveThread receiveWorker;
-	private NotificationManager notificationManager;
-	private NotificationCompat.Builder builder;
 	private CallStateListener callListener;
 	private TelephonyManager tmanager;
 	
@@ -37,8 +33,11 @@ public class ReceiveService extends Service{
 	private int portInput;
 	
 	private PowerManager powerManager;
-	private WakeLock wakeLock;
+//	private WakeLock wakeLock;
 	private WifiLock wifiLock;
+	private MulticastLock multicastLock;
+	
+	private NotificationCompat.Builder builder;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -48,13 +47,20 @@ public class ReceiveService extends Service{
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
+		
 		Log.d(Constants.LOG, "recService created");
 		powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-		        Constants.WAKELOCK);
+//		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+//		        Constants.WAKELOCK);
 		
-		wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
-			    .createWifiLock(WifiManager.WIFI_MODE_FULL, Constants.WAKELOCK);
+//		wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
+//			    .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, Constants.WAKELOCK);
+		
+//		multicastLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE))
+//				.createMulticastLock("multicastlock");
+		
 		notificationManager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
 	}
 
@@ -66,8 +72,6 @@ public class ReceiveService extends Service{
 		tmanager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
 		tmanager.listen(callListener, PhoneStateListener.LISTEN_CALL_STATE);
 		
-		this.startForeground(Constants.NOTIF_ID, showNotification());
-		
 		if(this.state == STATE.STOPPED) {
 			Log.d(Constants.LOG, "STOPPED");
 		}
@@ -78,23 +82,40 @@ public class ReceiveService extends Service{
         return START_STICKY;
     }
 	
+	public void setToForground(NotificationCompat.Builder builder) {
+		super.setToForground(builder);
+		this.builder = builder;
+		if(state == STATE.STOPPED) {
+			builder.setContentTitle(this.getString(R.string.stopped));
+			notificationManager.notify(Constants.NOTIF_ID, builder.build());
+		}
+		if(state == STATE.PLAYING) {
+			builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + this.portInput);
+			notificationManager.notify(Constants.NOTIF_ID, builder.build());
+		}
+	}
+	
+	
 	public void setPort(int port) {
 		this.portInput = port;
 	}
 	
-	public void startPlaying() {
+	public void startPlaying(int portInput, String codec, int sampleRate, int sampleSize, int channels) {
 		if(state == STATE.STOPPED) {
 			
-			if(!wakeLock.isHeld()) {
-				wakeLock.acquire();
-				Log.d("VOICE", "aquired");
-			}
-			if(!wifiLock.isHeld()) {
-				wifiLock.acquire();
-				Log.d("VOICE", "aquired");
-			}
+//			if(!wakeLock.isHeld()) {
+//				wakeLock.acquire();
+//				Log.d("VOICE", "aquired");
+//			}
+//			if(!wifiLock.isHeld()) {
+//				wifiLock.acquire();
+//				Log.d("VOICE", "wifilock aquired");
+//			}
+//			if(!multicastLock.isHeld()) {
+//				multicastLock.acquire();
+//			}
 			
-			receiveWorker = new ReceiveThread(portInput, this);
+			receiveWorker = new ReceiveThread(portInput, codec, sampleRate, sampleSize, channels, this);
 			Thread thread = new Thread(receiveWorker);
 			thread.start();
 			builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + portInput);
@@ -127,9 +148,9 @@ public class ReceiveService extends Service{
 			builder.setContentTitle(this.getString(R.string.stopped));
 			notificationManager.notify(Constants.NOTIF_ID, builder.build());
 			
-			wakeLock.release();
-			wifiLock.release();
-			Log.d("VOICE", "released");
+//			wakeLock.release();
+//			wifiLock.release();
+//			multicastLock.release();
 		}
 	}
 	
@@ -149,33 +170,6 @@ public class ReceiveService extends Service{
 		public ReceiveService getService() {
 			return ReceiveService.this;
 		}
-	}
-	
-	private Notification showNotification() {
-		builder = new NotificationCompat.Builder(this);
-		if(state == STATE.STOPPED) {
-			builder.setContentTitle(this.getString(R.string.stopped));
-		}
-		if(state == STATE.PLAYING) {
-			builder.setContentTitle(this.getString(R.string.playing_listenin_at_port) + this.portInput);
-		}
-		builder.setContentText(this.getString(R.string.tap_to_open));
-//		builder.setLargeIcon(R.drawable.ic_launcher);
-		builder.setAutoCancel(false);
-		builder.setSmallIcon(R.drawable.ic_launcher);
-		
-		Intent resultIntent = new Intent(this, MainActivity.class);
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-		stackBuilder.addParentStack(MainActivity.class);
-		stackBuilder.addNextIntent(resultIntent);
-		PendingIntent resultPendingIntent =
-		        stackBuilder.getPendingIntent(
-		            0,
-		            PendingIntent.FLAG_UPDATE_CURRENT
-		        );
-		
-		builder.setContentIntent(resultPendingIntent);
-		return builder.build();
 	}
 	
 	public STATE getRunningState() {
