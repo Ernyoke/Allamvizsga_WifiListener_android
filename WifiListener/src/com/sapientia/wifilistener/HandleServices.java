@@ -107,6 +107,15 @@ public class HandleServices {
 	
 	public void startPlayer(NavDrawerChannel channel) {
 		recService.setPort(channel.getPort());
+		if(recService.getRunningState() != STATE.STOPPED) {
+			try {
+			stopPlayer(lastStartedChannel);
+			lastStartedChannel.setState(STATE.STOPPED);
+			}
+			catch(NullPointerException ex) {
+				//
+			}
+		}
 		recService.startPlaying(channel.getPort(), channel.getCodec(), channel.getSampleRate(), 
 				channel.getSampleSize(), channel.getChannels());
 		channel.setState(recService.getRunningState());

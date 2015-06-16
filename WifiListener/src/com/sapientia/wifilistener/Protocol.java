@@ -96,7 +96,7 @@ public class Protocol {
 			data.add(tmpBuffer);
 			contentLength += content.length;
 		}
-		byte[] tmpBuffer = Arrays.copyOfRange(content, 0, CONTENTSIZE);
+		byte[] tmpBuffer = Arrays.copyOfRange(content, 0, content.length);
 		data.add(tmpBuffer);
 		contentLength += content.length;
 	}
@@ -175,12 +175,14 @@ public class Protocol {
 				int i = 0;
 				long timestamp = generateTimeStamp();
 				ByteBuffer buffer = ByteBuffer.allocate(65507);
+				buffer.mark();
 				int packetSize = 0;
 				for(byte[] chunk : data) {
 					try {
 						mutex.acquire();
 						packetCounter++;
 						buffer.putLong(packetCounter);
+//						packetSize += 8; //size of packetCounter;
 						mutex.release();
 					} catch (InterruptedException e1) {
 						// TODO Auto-generated catch block
@@ -192,18 +194,21 @@ public class Protocol {
 					buffer.putInt(data.size());
 					buffer.putInt(i);
 					buffer.putInt(chunk.length);
+//					packetSize += 28;
 					buffer.put(chunk);
-					buffer.flip();
-					packetSize = buffer.limit();
+//					packetSize += chunk.length;
+					packetSize = buffer.position();
+					Log.d(Constants.LOG, "Sizeof packet:" + packetSize);
 					byte[] content = new byte[packetSize];
-					buffer.get(content);
+					buffer.reset();
+					buffer.get(content, 0, packetSize);
 					DatagramPacket packet = new DatagramPacket(content, packetSize);
 					Log.d(Constants.LOG, "Arrya lenght:" + packetSize);
 					packet.setPort(port);
 					packet.setAddress(address.getAddress());
+					Log.d(Constants.LOG, address.getAddress().toString());
 					try {
 						socket.send(packet);
-						Log.d(Constants.LOG, "Port:" + socket.getPort() + " ");
 					} catch (IOException e) {
 						Log.d(Constants.LOG, "Send error:" + e.getMessage());
 						e.printStackTrace();

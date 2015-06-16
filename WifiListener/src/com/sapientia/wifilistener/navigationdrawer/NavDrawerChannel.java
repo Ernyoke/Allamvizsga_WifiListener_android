@@ -33,7 +33,7 @@ public class NavDrawerChannel extends NavDrawerItem implements Parcelable {
 	public NavDrawerChannel(byte[] content) {
 		ByteBuffer tmpBuffer  = ByteBuffer.wrap(content);
 		ownerId = tmpBuffer.getInt();
-		port = tmpBuffer.getShort();
+		port = tmpBuffer.getInt();
 		sampleRate = tmpBuffer.getInt();
 		sampleSize = tmpBuffer.getInt();
 		channels = tmpBuffer.getInt();

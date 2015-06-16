@@ -101,6 +101,9 @@ public class ReceiveService extends ForegroundServices {
 	}
 	
 	public void startPlaying(int portInput, String codec, int sampleRate, int sampleSize, int channels) {
+		if(state == STATE.PLAYING) {
+			this.stopPlaying();
+		}
 		if(state == STATE.STOPPED) {
 			
 //			if(!wakeLock.isHeld()) {

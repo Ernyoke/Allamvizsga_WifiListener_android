@@ -162,7 +162,7 @@ public class ServerCommunicatorService extends ForegroundServices {
 			DatagramChannel channel = DatagramChannel.open();
 		    socket = channel.socket();
 		    socket.setReuseAddress(true);
-//			socket = new DatagramSocket();
+//			socket = new DatagramSocket(null);
 			
 		} catch (SocketException e) {
 			Log.d(Constants.LOG, "Socket error");
@@ -232,7 +232,8 @@ public class ServerCommunicatorService extends ForegroundServices {
 			Toast.makeText(this, "Invalid IP address!", Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 			return;
-		} catch (SocketException e) {
+		} 
+		catch (SocketException e) {
 			Log.d(Constants.LOG, e.getMessage());
 			e.printStackTrace();
 		}
