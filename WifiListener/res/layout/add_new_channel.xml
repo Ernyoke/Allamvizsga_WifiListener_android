@@ -81,6 +81,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="40dp"
         android:layout_toRightOf="@+id/freqText"
+        android:inputType="numberDecimal"
         android:ems="10" >
 
     </EditText>

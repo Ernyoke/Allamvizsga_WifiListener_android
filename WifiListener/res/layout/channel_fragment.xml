@@ -153,7 +153,7 @@
 	        android:id="@+id/startBtn"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:background="@drawable/play_icon" />
+	        android:background="@drawable/play_btn_states" />
         
          <Space
             android:layout_width="10dip"
@@ -165,7 +165,7 @@
 	        android:id="@+id/stopBtn"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:background="@drawable/stop_icon" />
+	        android:background="@drawable/stop_btn_states" />
         
          <Space
             android:layout_width="10dip"
@@ -177,7 +177,7 @@
 	        android:id="@+id/pauseBtn"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:background="@drawable/pause_icon" />
+	        android:background="@drawable/pause_btn_states" />
     </GridLayout>
 
     <TextView

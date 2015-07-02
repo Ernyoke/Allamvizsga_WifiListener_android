@@ -56,6 +56,9 @@ public class ChannelFragment extends BaseFragment{
 					break;
 				}
 				}
+				
+				ChannelFragment.this.updateButtonStatus();
+				
 			}
 		};
 		startBtn.setOnClickListener(clickListener);
@@ -69,6 +72,7 @@ public class ChannelFragment extends BaseFragment{
       	stopBtn.setEnabled(false);
       	startBtn.setEnabled(true);
       	pauseBtn.setEnabled(false);
+      	status.setText("stopped");
       	break;
       }
       
@@ -76,6 +80,7 @@ public class ChannelFragment extends BaseFragment{
       	stopBtn.setEnabled(true);
       	startBtn.setEnabled(false);
       	pauseBtn.setEnabled(true);
+      	status.setText("playing");
       	break;
       }
       
@@ -83,6 +88,7 @@ public class ChannelFragment extends BaseFragment{
       	startBtn.setEnabled(false);
       	stopBtn.setEnabled(true);
       	pauseBtn.setEnabled(true);
+      	status.setText("paused");
       }
       }
 	}
@@ -113,8 +119,8 @@ public class ChannelFragment extends BaseFragment{
         language.setText(channel.getTitle());
         port.setText(channel.getPort() + "");
         codec.setText(channel.getCodec());
-        sampleRate.setText(channel.getSampleRate() + "");
-        sampleSize.setText(channel.getSampleSize() + "");
+        sampleRate.setText(channel.getSampleRate() + " Hz");
+        sampleSize.setText(channel.getSampleSize() + " bits");
         channels.setText(channel.getChannels() + "");
         
         status.setText(channel.getState_str());
